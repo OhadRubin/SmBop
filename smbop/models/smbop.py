@@ -58,7 +58,8 @@ class SmbopParser(Model):
         self._utterance_augmenter = utterance_augmenter
         self._action_dim = beam_encoder.get_output_dim()
         self._beam_size = beam_size
-        self.n_schema_leafs = 15
+        self._n_schema_leafs = 15
+        self._num_values = 15
 
         self.tokenizer = TokenIndexer.by_name("pretrained_transformer")(
             model_name="Salesforce/grappa_large_jnt"
@@ -409,12 +410,12 @@ class SmbopParser(Model):
 
             else:
                 final_span_scores = span_scores
-            ten = 10
+            
 
             _, leaf_span_mask, best_spans = allennlp.nn.util.masked_topk(
                 final_span_scores.view([batch_size, -1]),
                 span_mask.view([batch_size, -1]),
-                ten,
+                self._num_values,
             )
             span_start_indices = best_spans // utterance_length
             span_end_indices = best_spans % utterance_length
@@ -470,7 +471,7 @@ class SmbopParser(Model):
             allennlp.nn.util.min_value_of_dtype(final_leaf_schema_scores.dtype),
         )
 
-        min_k = torch.clamp(schema_mask.sum(-1), 0, self.n_schema_leafs)
+        min_k = torch.clamp(schema_mask.sum(-1), 0, self._n_schema_leafs)
         _, leaf_schema_mask, top_beam_indices = allennlp.nn.util.masked_topk(
             final_leaf_schema_scores.squeeze(-1), mask=schema_mask.bool(), k=min_k
         )
@@ -479,7 +480,7 @@ class SmbopParser(Model):
 
             leaf_indices = torch.nn.functional.pad(
                 leaf_indices,
-                pad=(0, self.n_schema_leafs - leaf_indices.size(-1)),
+                pad=(0, self._n_schema_leafs - leaf_indices.size(-1)),
                 mode="constant",
                 value=-1,
             )
@@ -789,7 +790,7 @@ class SmbopParser(Model):
                         top_idx % self._beam_size,
                         items,
                         len(items) - 1,
-                        self.n_schema_leafs,
+                        self._n_schema_leafs,
                     )
                     tree_copy = deepcopy(tree_res)
                     sql = ra_postproc.ra_to_sql(tree_res)
