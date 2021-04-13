@@ -56,11 +56,12 @@ local large_setting = {
   // model_name :: "google/bigbird-roberta-large",
   
   pretrained_embedding_dim :: 1024,
-  cache_path ::  if misc_params.value_pred then "cache/exp700" else "cache/exp304_no_values", 
+  // cache_path ::  if misc_params.value_pred then "cache/exp700" else "cache/exp304_no_values", 
+  cache_path ::  if misc_params.value_pred then "cache/exp1000" else "cache/exp304_no_values", 
   
 
 };
-local max_instances = if misc_params.tiny_dataset then 400 else null;
+local max_instances = if misc_params.tiny_dataset then 3500 else 1000000;
 
 
 

@@ -1,5 +1,5 @@
-allennlp==1.2.0
-torch==1.7.0
+allennlp==2.2.0
+torch==1.8.1
 sh==1.13.1
 pandas==1.1.0
 numpy==1.18.5

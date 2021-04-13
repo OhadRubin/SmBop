@@ -538,10 +538,10 @@ class SmbopParser(Model):
             )
 
         outputs["leaf_beam_hash"] = beam_hash
-        enc_list = [
-            self.tokenizer.decode(enc["tokens"]["token_ids"][b].tolist())
-            for b in range(batch_size)
-        ]
+        # enc_list = [
+        #     self.tokenizer.decode(enc["tokens"]["token_ids"][b].tolist())
+        #     for b in range(batch_size)
+        # ]
 
         for decoding_step in range(self._decoder_timesteps):
             batch_size, seq_len, _ = beam_rep.shape

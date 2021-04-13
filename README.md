@@ -5,7 +5,7 @@ Author implementation of this [NAACL 2021 paper](https://arxiv.org/abs/2010.1241
 
 ## Install & Configure
 
-1. Install pytorch 1.7.0 that fits your CUDA version 
+1. Install pytorch 1.8.1 that fits your CUDA version 
 
     
 2. Install the rest of required packages
