@@ -241,38 +241,7 @@ class SmbopSpiderDatasetReader(DatasetReader):
             sql_with_values=sql_with_values,
         )
         return ins
-    # @overrides
-    # def _instances_from_cache_file(self, cache_filename: str):
-    #     with open(cache_filename, "rb") as cache_file:
-    #         d = dill.load(cache_file)
-    #         for i, x in enumerate(d):
-    #             if "orig_entities" not in x.fields:
 
-    #                 db_id = x.fields["db_id"].metadata
-    #                 entities_as_leafs = x.fields["entities"].metadata
-    #                 orig_entites = [
-    #                     self.replacer.post(x, db_id) for x in entities_as_leafs
-    #                 ]
-    #                 x.fields["orig_entities"] = MetadataField(orig_entites)
-
-    #             if "depth" not in x.fields:
-    #                 max_depth = max(
-    #                     [leaf.depth for leaf in x.fields["tree_obj"].metadata.leaves]
-    #                 )
-    #                 x.fields["depth"] = ArrayField(
-    #                     np.array([1] * max_depth), padding_value=0, dtype=np.int32
-    #                 )
-    #             if x.fields["depth"].array.shape[0] > 9:
-    #                 continue
-    #             if i != self.limit_instances:
-    #                 yield x
-    #             else:
-    #                 break
-
-    # @overrides
-    # def _instances_to_cache_file(self, cache_filename, instances) -> None:
-    #     with open(cache_filename, "wb") as cache:
-    #         dill.dump(instances, cache)
 
     def text_to_instance(
         self, utterance: str, db_id: str, sql=None, sql_with_values=None
