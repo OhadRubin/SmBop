@@ -32,7 +32,7 @@ from smbop.utils.replacer import Replacer
 import time
 from smbop.dataset_readers.enc_preproc import *
 import smbop.dataset_readers.disamb_sql as disamb_sql
-
+from smbop.utils.cache import TensorCache
 
 logger = logging.getLogger(__name__)
 
@@ -52,19 +52,20 @@ class SmbopSpiderDatasetReader(DatasetReader):
         qq_max_dist=2,
         cc_max_dist=2,
         tt_max_dist=2,
-        max_instances=None,
+        max_instances=10000000,
         decoder_timesteps=9,
         limit_instances=-1,
         value_pred=True,
-        # **kwargs,
     ):
         super().__init__(
-            lazy=lazy,
-            cache_directory=cache_directory,
+            # lazy=lazy,
+            # cache_directory=cache_directory,
             # max_instances=max_instances,
             #  manual_distributed_sharding=True,
             # manual_multi_process_sharding=True,
         )
+        self.cache_directory = cache_directory
+        self.cache = TensorCache(cache_directory)
         self.value_pred = value_pred
         self._decoder_timesteps = decoder_timesteps
         self._max_instances = max_instances
@@ -178,81 +179,100 @@ class SmbopSpiderDatasetReader(DatasetReader):
             raise ConfigurationError(f"Don't know how to read filetype of {file_path}")
 
     def _read_examples_file(self, file_path: str):
-        cache_dir = os.path.join("cache", file_path.split("/")[-1])
+        # cache_dir = os.path.join("cache", file_path.split("/")[-1])
 
         cnt = 0
-        time_dict = {}
+        cache_buffer = []
+        sent_set = set()
+        for total_cnt,ins in self.cache:
+            if cnt >= self._max_instances:
+                break
+            if ins is not None:
+                yield ins
+                cnt += 1
+            sent_set.add(total_cnt)
+
+        
         with open(file_path, "r") as data_file:
             json_obj = json.load(data_file)
             for total_cnt, ex in enumerate(json_obj):
-                total_start = time.time()
-
-                if total_cnt == self._max_instances:
+                if cnt >= self._max_instances:
                     break
-                sql = None
-                sql_with_values = None
-
-                if "query_toks" in ex:
-                    try:
-                        ex = disamb_sql.fix_number_value(ex)
-                        sql = disamb_sql.disambiguate_items(
-                            ex["db_id"],
-                            ex["query_toks_no_value"],
-                            self._tables_file,
-                            allow_aliases=False,
-                        )
-                        sql_with_values = disamb_sql.sanitize(ex["query"])
-                    except Exception as e:
-                        # there are two examples in the train set that are wrongly formatted, skip them
-                        print(f"error with {ex['query']}")
-                        continue
-
-                ins = self.text_to_instance(
-                    utterance=ex["question"],
-                    db_id=ex["db_id"],
-                    sql=sql,
-                    sql_with_values=sql_with_values,
-                )
-                total_time = time.time() - total_start
-                time_dict[total_cnt] = total_time
+                if len(cache_buffer)>50:
+                    self.cache.write(cache_buffer)
+                    cache_buffer = []
+                if total_cnt in sent_set:
+                    continue
+                else:    
+                    ins = self.create_instance(ex)
+                    cache_buffer.append([total_cnt, ins])
                 if ins is not None:
                     yield ins
+                    cnt +=1
+        self.cache.write(cache_buffer)
+
 
     def process_instance(self, instance: Instance, index: int):
         return instance
 
-    @overrides
-    def _instances_from_cache_file(self, cache_filename: str):
-        with open(cache_filename, "rb") as cache_file:
-            d = dill.load(cache_file)
-            for i, x in enumerate(d):
-                if "orig_entities" not in x.fields:
+    def create_instance(self,ex):
+        sql = None
+        sql_with_values = None
 
-                    db_id = x.fields["db_id"].metadata
-                    entities_as_leafs = x.fields["entities"].metadata
-                    orig_entites = [
-                        self.replacer.post(x, db_id) for x in entities_as_leafs
-                    ]
-                    x.fields["orig_entities"] = MetadataField(orig_entites)
+        if "query_toks" in ex:
+            try:
+                ex = disamb_sql.fix_number_value(ex)
+                sql = disamb_sql.disambiguate_items(
+                    ex["db_id"],
+                    ex["query_toks_no_value"],
+                    self._tables_file,
+                    allow_aliases=False,
+                )
+                sql_with_values = disamb_sql.sanitize(ex["query"])
+            except Exception as e:
+                # there are two examples in the train set that are wrongly formatted, skip them
+                print(f"error with {ex['query']}")
+                return None
 
-                if "depth" not in x.fields:
-                    max_depth = max(
-                        [leaf.depth for leaf in x.fields["tree_obj"].metadata.leaves]
-                    )
-                    x.fields["depth"] = ArrayField(
-                        np.array([1] * max_depth), padding_value=0, dtype=np.int32
-                    )
-                if x.fields["depth"].array.shape[0] > 9:
-                    continue
-                if i != self.limit_instances:
-                    yield x
-                else:
-                    break
+        ins = self.text_to_instance(
+            utterance=ex["question"],
+            db_id=ex["db_id"],
+            sql=sql,
+            sql_with_values=sql_with_values,
+        )
+        return ins
+    # @overrides
+    # def _instances_from_cache_file(self, cache_filename: str):
+    #     with open(cache_filename, "rb") as cache_file:
+    #         d = dill.load(cache_file)
+    #         for i, x in enumerate(d):
+    #             if "orig_entities" not in x.fields:
 
-    @overrides
-    def _instances_to_cache_file(self, cache_filename, instances) -> None:
-        with open(cache_filename, "wb") as cache:
-            dill.dump(instances, cache)
+    #                 db_id = x.fields["db_id"].metadata
+    #                 entities_as_leafs = x.fields["entities"].metadata
+    #                 orig_entites = [
+    #                     self.replacer.post(x, db_id) for x in entities_as_leafs
+    #                 ]
+    #                 x.fields["orig_entities"] = MetadataField(orig_entites)
+
+    #             if "depth" not in x.fields:
+    #                 max_depth = max(
+    #                     [leaf.depth for leaf in x.fields["tree_obj"].metadata.leaves]
+    #                 )
+    #                 x.fields["depth"] = ArrayField(
+    #                     np.array([1] * max_depth), padding_value=0, dtype=np.int32
+    #                 )
+    #             if x.fields["depth"].array.shape[0] > 9:
+    #                 continue
+    #             if i != self.limit_instances:
+    #                 yield x
+    #             else:
+    #                 break
+
+    # @overrides
+    # def _instances_to_cache_file(self, cache_filename, instances) -> None:
+    #     with open(cache_filename, "wb") as cache:
+    #         dill.dump(instances, cache)
 
     def text_to_instance(
         self, utterance: str, db_id: str, sql=None, sql_with_values=None
