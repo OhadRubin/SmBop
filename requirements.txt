@@ -1,0 +1,11 @@
+allennlp==1.2.0
+torch==1.7.0
+sh==1.13.1
+pandas==1.1.0
+numpy==1.18.5
+anytree==2.8.0
+namegenerator==1.0.6
+overrides==3.1.0
+dill==0.3.2
+en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.2.5/en_core_web_sm-2.2.5.tar.gz
+mo-future==2.48.19205

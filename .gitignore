@@ -1,0 +1,12 @@
+/backup
+.ipynb_checkpoints
+/dataset
+/cache
+/experiments/
+/prev_experiments/
+*.pyc
+**/pyc
+*/.ipynb_checkpoints/*
+__pycache__
+smbop.code-workspace
+.vscode
