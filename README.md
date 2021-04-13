@@ -26,7 +26,7 @@ the location of the dataset:
 local dataset_path = "dataset/";
 ```
 ## Training the parser
-Use the following AllenNLP command to train:
+Use the following command to train:
 ```
 python exec.py 
 ``` 
