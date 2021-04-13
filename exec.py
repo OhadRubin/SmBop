@@ -110,11 +110,11 @@ def run():
         params_overrides=overrides_json,
     )
     prefix = ""
-    prefix = "/home/ohadr/"
+#     prefix = "/home/ohadr/"
 
     assert not pathlib.Path(f"{prefix}experiments/{experiment_name}").exists()
 
-    sh.ln("-s", f"{prefix}/experiments/{experiment_name}", f"experiments/{experiment_name}")
+#     sh.ln("-s", f"{prefix}/experiments/{experiment_name}", f"experiments/{experiment_name}")
     pathlib.Path(f"backup").mkdir(exist_ok=True)
     # pathlib.Path(f"experiments/{experiment_name}").mkdir(exist_ok=True)
 
