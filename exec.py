@@ -110,7 +110,7 @@ def run():
         params_overrides=overrides_json,
     )
     prefix = ""
-    prefix = "/home/ohadr/"
+    # prefix = "/home/ohadr/"
 
     assert not pathlib.Path(f"{prefix}experiments/{experiment_name}").exists()
 

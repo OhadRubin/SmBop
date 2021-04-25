@@ -59,7 +59,7 @@ class SmbopParser(Model):
         self._action_dim = beam_encoder.get_output_dim()
         self._beam_size = beam_size
         self._n_schema_leafs = 15
-        self._num_values = 15
+        self._num_values = 10
 
         self.tokenizer = TokenIndexer.by_name("pretrained_transformer")(
             model_name="Salesforce/grappa_large_jnt"
