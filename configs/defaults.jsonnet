@@ -218,7 +218,7 @@ local dataset_reader_name = "smbop";
     "use_amp":misc_params.amp,
     "num_epochs": std.floor((max_steps*setting.batch_size*setting.grad_acum)/examples),
     "cuda_device": std.parseInt(std.extVar('gpu')),
-    "patience": 50,
+    "patience": 100,
     "validation_metric":  "+spider",
 
     

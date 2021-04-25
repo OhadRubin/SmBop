@@ -112,6 +112,7 @@ def run():
     prefix = ""
 #     prefix = "/home/ohadr/"
 
+
     assert not pathlib.Path(f"{prefix}experiments/{experiment_name}").exists()
 
 #     sh.ln("-s", f"{prefix}/experiments/{experiment_name}", f"experiments/{experiment_name}")

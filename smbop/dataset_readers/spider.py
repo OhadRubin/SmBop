@@ -311,7 +311,6 @@ class SmbopSpiderDatasetReader(DatasetReader):
         desc = self.enc_preproc.get_desc(tokenized_utterance, db_id)
         entities, added_values, relation = self.extract_relation(desc)
 
-        fields["relation"] = ArrayField(relation, padding_value=-1, dtype=np.int32)
 
         question_concated = [[x] for x in tokenized_utterance[1:-1]]
         schema_tokens_pre, schema_tokens_pre_mask = table_text_encoding(
@@ -329,21 +328,24 @@ class SmbopSpiderDatasetReader(DatasetReader):
         entities_as_leafs = [x.split(":")[0] for x in entities[len(added_values) + 1 :]]
         entities_as_leafs = added_values + ["*"] + entities_as_leafs
         orig_entities = [self.replacer.post(x, db_id) for x in entities_as_leafs]
-        fields["entities"] = MetadataField(entities_as_leafs)
-        fields["orig_entities"] = MetadataField(orig_entities)
-
         entities_as_leafs_hash, entities_as_leafs_types = self.hash_schema(
             entities_as_leafs, added_values
         )
 
-        fields["leaf_hash"] = ArrayField(
-            entities_as_leafs_hash, padding_value=-1, dtype=np.int64
-        )
-        fields["leaf_types"] = ArrayField(
-            entities_as_leafs_types,
-            padding_value=self._type_dict["nan"],
-            dtype=np.int32,
-        )
+        fields.update(
+            {
+                "relation": ArrayField(relation, padding_value=-1, dtype=np.int32),
+                "entities": MetadataField(entities_as_leafs),
+                 "orig_entities": MetadataField(orig_entities),
+                 "leaf_hash": ArrayField(
+                    entities_as_leafs_hash, padding_value=-1, dtype=np.int64
+                ),
+                "leaf_types": ArrayField(
+                    entities_as_leafs_types,
+                    padding_value=self._type_dict["nan"],
+                    dtype=np.int32,
+                )
+            })
 
         if has_gold:
             leaf_indices, is_gold_leaf, depth = self.is_gold_leafs(
