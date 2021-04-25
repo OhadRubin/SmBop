@@ -32,6 +32,34 @@ python exec.py
 ``` 
 
 First time loading of the dataset might take a while (a few hours) since the model first loads values from tables and calculates similarity features with the relevant question. It will then be cached for subsequent runs.
+
+## Evaluation
+To create predictions run the following command:
+```
+python eval.py --archive_path {model_path} --output preds.sql
+``` 
+To run the evalutation with the official spider script:
+
+```
+python smbop/eval_final/evaluation.py --gold dataset/dev_gold.sql --pred preds.sql --etype all --db  dataset/database  --table dataset/tables.json
+``` 
+
+## Pretrained model
+You can download a pretrained model from [here](https://drive.google.com/file/d/1pQvg2sT7h9t_srgmN1nGGMfIPa62U9ag/view?usp=sharing).
+It achieves the following results on the offical script:
+
+```
+                     easy                 medium               hard                 extra                all                 
+count                248                  446                  174                  166                  1034                
+=====================   EXECUTION ACCURACY     =====================
+execution            0.883                0.791                0.684                0.530                0.753             
+
+====================== EXACT MATCHING ACCURACY =====================
+exact match          0.883                0.791                0.655                0.512                0.746
+``` 
+
+
+
 <!-- 
 
 
