@@ -58,6 +58,8 @@ execution            0.883                0.791                0.684            
 exact match          0.883                0.791                0.655                0.512                0.746
 ``` 
 
+## Demo
+You can run SmBoP on a Google Colab notebook [here](https://colab.research.google.com/drive/1KGlETGn9wngUPQrkFfa7ySecU-t_I3Y2#scrollTo=X1v6F3TlOMKH).
 
 
 <!-- 
