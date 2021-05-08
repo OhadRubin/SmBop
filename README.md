@@ -62,6 +62,18 @@ exact match          0.883                0.791                0.655            
 You can run SmBoP on a Google Colab notebook [here](https://colab.research.google.com/drive/1KGlETGn9wngUPQrkFfa7ySecU-t_I3Y2#scrollTo=X1v6F3TlOMKH).
 
 
+### Docker
+You could also use the demo with docker:
+```
+docker build -t smbop .
+docker run -it --gpus=all smbop:latest
+```
+
+This will create a infrence terminal similar to the Google Colab demo, you could  run for example:
+```
+>>>inference("Which films cost more than 50 dollars or less than 10?","cinema")
+SELECT film.title FROM schedule JOIN film ON schedule.film_id = film.film_id WHERE schedule.price > 50 OR schedule.price<10
+```
 <!-- 
 
 
