@@ -21,6 +21,7 @@ from allennlp.common import Params
 #from modules.lxmert import LxmertCrossAttentionLayer
 #from training.callbacks import PredictionLogger, PerformanceLogger
 
+#Imports copied from exec.py
 from smbop.dataset_readers.spider import SmbopSpiderDatasetReader
 from smbop.models.smbop import SmbopParser
 from smbop.modules.relation_transformer import RelationTransformer
