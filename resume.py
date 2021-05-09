@@ -13,11 +13,20 @@ import sh
 
 from allennlp.commands.train import train_model
 from allennlp.common import Params
-from dataset_readers.forest_spider import ForestSpiderDatasetReader
-from models.semantic_parsing.smbop import SmbopParser
-from modules.relation_transformer import RelationTransformer
-from modules.lxmert import LxmertCrossAttentionLayer
-from training.callbacks import PredictionLogger, PerformanceLogger
+
+#Old imports causing app to break
+#from dataset_readers.forest_spider import ForestSpiderDatasetReader
+#from models.semantic_parsing.smbop import SmbopParser
+#from modules.relation_transformer import RelationTransformer
+#from modules.lxmert import LxmertCrossAttentionLayer
+#from training.callbacks import PredictionLogger, PerformanceLogger
+
+from smbop.dataset_readers.spider import SmbopSpiderDatasetReader
+from smbop.models.smbop import SmbopParser
+from smbop.modules.relation_transformer import RelationTransformer
+from smbop.modules.lxmert import LxmertCrossAttentionLayer
+
+
 
 # from allennlp.common.params import with_fallback
 import namegenerator
