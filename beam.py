@@ -57,7 +57,7 @@ def res_to_beam(res, model):
             sql = ra_postproc.ra_to_sql(tree_res)
             sql_list.append(sql)
         except:
-            pass
+            sql_list.append("")
     return sql_list
 
 
@@ -106,7 +106,8 @@ def main():
                             [instance, instance_0]
                         )
                         
-                        res = ForwardResult(**(out[0]))                        
+                        res = ForwardResult(**(out[0]))               
+                        # beam is sorted such that beam[-1] is the top score elemnt         
                         beam = res_to_beam(res, predictor._model)                        
                 else:
                     beam = []
