@@ -750,6 +750,7 @@ class SmbopParser(Model):
         leaf_acc_list = []
         sql_list = []
         tree_list = []
+        beam_scores_el_list = []
         if hash_gold_tree is not None:
             for gs, fa in zip(hash_gold_tree, beam_hash.tolist()):
                 acc = int(gs) in fa
@@ -774,11 +775,11 @@ class SmbopParser(Model):
 
             # TODO: change this!! this causes bugs!
             for b in range(batch_size):
-
                 beam_scores_el = kwargs["beam_scores_tensor"][b]
                 beam_scores_el[
                     : -self._beam_size
                 ] = allennlp.nn.util.min_value_of_dtype(beam_scores_el.dtype)
+                beam_scores_el_list.append(beam_scores_el)
                 top_idx = int(beam_scores_el.argmax())
                 tree_copy = ""
                 try:
@@ -824,7 +825,7 @@ class SmbopParser(Model):
                 sql_list.append(sql)
                 tree_list.append(tree_copy)
                 spider_acc_list.append(spider_acc)
-            outputs["beam_scores"] = [beam_scores_el]+([None]*(batch_size-1))
+            outputs["beam_scores"] = beam_scores_el_list
             outputs["beam_encoding"] = [kwargs["item_list"]]+([None]*(batch_size-1))
             outputs["beam_hash"] = [kwargs["beam_hash_tensor"]]+([None]*(batch_size-1))
             outputs["gold_hash"] = hash_gold_tree or ([None]*batch_size)
@@ -834,6 +835,7 @@ class SmbopParser(Model):
             outputs["tree_list"] = tree_list
         outputs["final_beam_acc"] = final_beam_acc_list or ([None]*batch_size)
         outputs["leaf_acc"] = leaf_acc_list or ([None]*batch_size)
+
     def _augment_with_utterance(
         self,
         embedded_utterance,
