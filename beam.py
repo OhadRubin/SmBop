@@ -58,6 +58,7 @@ def res_to_beam(res, model):
             sql_list.append(sql)
         except:
             sql_list.append("")
+
     return sql_list
 
 
@@ -105,9 +106,9 @@ def main():
                         out = predictor._model.forward_on_instances(
                             [instance, instance_0]
                         )
-                        
-                        res = ForwardResult(**(out[0]))               
+                                
                         # beam is sorted such that beam[-1] is the top score elemnt         
+                        res = ForwardResult(**(out[0]))                        
                         beam = res_to_beam(res, predictor._model)                        
                 else:
                     beam = []

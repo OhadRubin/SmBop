@@ -835,7 +835,7 @@ class SmbopParser(Model):
             outputs["tree_list"] = tree_list
         outputs["final_beam_acc"] = final_beam_acc_list or ([None]*batch_size)
         outputs["leaf_acc"] = leaf_acc_list or ([None]*batch_size)
-        
+
     def _augment_with_utterance(
         self,
         embedded_utterance,
