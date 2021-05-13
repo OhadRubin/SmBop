@@ -18,13 +18,11 @@ Author implementation of this [NAACL 2021 paper](https://arxiv.org/abs/2010.1241
 python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')"
 ```
 
-4. Download the dataset from the [official Spider dataset website](https://yale-lily.github.io/spider)
+4. Download the Spider dataset with the following command:
+```
+ bash download_spider.sh 
+```
 
-5. Edit the config files `configs/defaults.jsonnet` to update 
-the location of the dataset:
-```
-local dataset_path = "dataset/";
-```
 ## Training the parser
 Use the following command to train:
 ```
