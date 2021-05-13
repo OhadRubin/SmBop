@@ -828,7 +828,11 @@ class SmbopParser(Model):
             outputs["beam_scores"] = beam_scores_el_list
             outputs["beam_encoding"] = [kwargs["item_list"]]+([None]*(batch_size-1))
             outputs["beam_hash"] = [kwargs["beam_hash_tensor"]]+([None]*(batch_size-1))
-            outputs["gold_hash"] = hash_gold_tree or ([None]*batch_size)
+            # outputs["gold_hash"] = hash_gold_tree or ([None]*batch_size)
+            if hash_gold_tree is not None:
+                outputs["gold_hash"] = hash_gold_tree
+            else:
+                outputs["gold_hash"] = [hash_gold_tree] + ([None]*(batch_size-1))
             outputs["reranker_acc"] = reranker_acc_list
             outputs["spider_acc"] = spider_acc_list
             outputs["sql_list"] = sql_list
