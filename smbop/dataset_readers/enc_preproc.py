@@ -10,6 +10,23 @@ import nltk
 
 import numpy as np
 
+#These DB take an extra hour to proccess.
+LONG_DB =  ['wta_1',
+ 'car_1',
+ 'chinook_1',
+ 'wine_1',
+ 'soccer_1',
+ 'sakila_1',
+ 'baseball_1',
+ 'college_2',
+ 'flight_4',
+ 'store_1',
+ 'flight_2',
+ 'world_1',
+ 'formula_1',
+ 'bike_1',
+ 'csu_1',
+ 'inn_1']
 
 def clamp(value, abs_max):
     value = max(-abs_max, value)
@@ -88,6 +105,7 @@ class EncPreproc:
         qq_max_dist,
         cc_max_dist,
         tt_max_dist,
+        use_longdb,
     ):
         self._tables_file = tables_file
         self._dataset_path = dataset_path
@@ -100,7 +118,12 @@ class EncPreproc:
         self.cc_max_dist = cc_max_dist
         self.tt_max_dist = tt_max_dist
         self.relation_ids = {}
+        if not use_longdb:
+            self.filter_longdb = lambda x: x not in LONG_DB
+        else:
+            self.filter_longdb = lambda x: True
 
+        
         def add_relation(name):
             self.relation_ids[name] = len(self.relation_ids)
 
@@ -565,8 +588,8 @@ class EncPreproc:
 
         return foreign_key_map
 
-    @classmethod
-    def compute_cell_value_linking(cls, tokens, schema):
+    
+    def compute_cell_value_linking(self, tokens, schema):
         def isnumber(word):
             try:
                 float(word)
@@ -618,22 +641,23 @@ class EncPreproc:
                     if column.type in ["number", "time"]:  # TODO fine-grained date
                         num_date_match[f"{q_id},{col_id}"] = column.type.upper()
                 else:
-                    ret = db_word_match(
-                        word,
-                        column.orig_name,
-                        column.table.orig_name,
-                        schema.connection,
-                    )
-                    if ret:
-                        # print(word, ret)
-                        cell_match[f"{q_id},{col_id}"] = CELL_MATCH_FLAG
+                    if self.filter_longdb(schema.db_id):
+                        ret = db_word_match(
+                            word,
+                            column.orig_name,
+                            column.table.orig_name,
+                            schema.connection,
+                        )
+                        if ret:
+                            # print(word, ret)
+                            cell_match[f"{q_id},{col_id}"] = CELL_MATCH_FLAG
 
         cv_link = {"num_date_match": num_date_match, "cell_match": cell_match}
         return cv_link
 
     @classmethod
     def preprocess_schema_uncached(
-        cls,
+        self,
         schema,
         tokenize_func,
         include_table_name_in_column,
