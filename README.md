@@ -31,7 +31,8 @@ Use the following command to train:
 python exec.py 
 ``` 
 
-First time loading of the dataset might take a while (a few hours) since the model first loads values from tables and calculates similarity features with the relevant question. It will then be cached for subsequent runs.
+First time loading of the dataset might take a while (a few hours) since the model first loads values from tables and calculates similarity features with the relevant question. It will then be cached for subsequent runs. Use the `disable_db_content` argument to reduce the pre-processing time in exchange of not performing IR on some (incredibly large) tables.
+
 
 ## Evaluation
 To create predictions run the following command:
