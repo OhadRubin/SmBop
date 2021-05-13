@@ -56,6 +56,7 @@ class SmbopSpiderDatasetReader(DatasetReader):
         decoder_timesteps=9,
         limit_instances=-1,
         value_pred=True,
+        use_longdb=True,
     ):
         super().__init__(
             # lazy=lazy,
@@ -91,6 +92,7 @@ class SmbopSpiderDatasetReader(DatasetReader):
             qq_max_dist,
             cc_max_dist,
             tt_max_dist,
+            use_longdb,
         )
         self._create_action_dicts()
         self.replacer = Replacer(tables_file)
@@ -423,7 +425,7 @@ class SmbopSpiderDatasetReader(DatasetReader):
         fields["offsets"] = ArrayField(
             np.array(offsets), padding_value=0, dtype=np.int32
         )
-        fields["enc"] = TextField(enc_field_list, self._utterance_token_indexers)
+        fields["enc"] = TextField(enc_field_list)
 
         ins = Instance(fields)
         return ins
@@ -531,6 +533,9 @@ class SmbopSpiderDatasetReader(DatasetReader):
                     span_text = self._tokenizer.tokenizer.decode(utt_idx[i_ : j_ + 1])
                     span_hash_array[i_, j_] = self.hash_text(span_text)
         return span_hash_array
+
+    def apply_token_indexers(self, instance: Instance) -> None:
+        instance.fields["enc"].token_indexers = self._utterance_token_indexers
 
 
 def table_text_encoding(entity_text_list):

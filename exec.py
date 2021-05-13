@@ -39,6 +39,7 @@ def run():
     parser.add_argument("--disable_disentangle_cntx", action="store_true")
     parser.add_argument("--disable_cntx_reranker", action="store_true")
     parser.add_argument("--disable_value_pred", action="store_true")
+    parser.add_argument("--disable_use_longdb", action="store_true")
     parser.add_argument("--uniquify", action="store_true")
     parser.add_argument("--use_bce", action="store_true")
     parser.add_argument("--tfixup", action="store_true")
@@ -47,7 +48,9 @@ def run():
     parser.add_argument("--disable_utt_aug", action="store_true")
     parser.add_argument("--should_rerank", action="store_true")
     parser.add_argument("--use_treelstm", action="store_true")
-    parser.add_argument("--disable_db_content", action="store_true")
+    parser.add_argument("--disable_db_content", action="store_true",
+                        help="Run with this argument (once) before pre-proccessing to reduce the pre-proccessing time by half \
+                         This argument causes EncPreproc to not perform IR on the largest tables. ")
     parser.add_argument("--lin_after_cntx", action="store_true")
     parser.add_argument("--optimizer", type=str, default="adam")
     parser.add_argument("--rat_layers", type=int, default=8)
@@ -110,7 +113,8 @@ def run():
         params_overrides=overrides_json,
     )
     prefix = ""
-#     prefix = "/home/ohadr/"
+    # prefix = "/home/ohadr/"
+    prefix = "/media/disk1/ohadr/"
 
 
     assert not pathlib.Path(f"{prefix}experiments/{experiment_name}").exists()
