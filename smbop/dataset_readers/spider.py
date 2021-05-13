@@ -70,6 +70,7 @@ class SmbopSpiderDatasetReader(DatasetReader):
         self._decoder_timesteps = decoder_timesteps
         self._max_instances = max_instances
         self.limit_instances = limit_instances
+        self.load_less = limit_instances!=-1
 
         self._utterance_token_indexers = question_token_indexers
 
@@ -183,6 +184,7 @@ class SmbopSpiderDatasetReader(DatasetReader):
 
         cnt = 0
         cache_buffer = []
+        cont_flag = True
         sent_set = set()
         for total_cnt,ins in self.cache:
             if cnt >= self._max_instances:
@@ -191,25 +193,28 @@ class SmbopSpiderDatasetReader(DatasetReader):
                 yield ins
                 cnt += 1
             sent_set.add(total_cnt)
+            if self.load_less and len(sent_set) > self.limit_instances:
+                cont_flag = False
+                break
 
-        
-        with open(file_path, "r") as data_file:
-            json_obj = json.load(data_file)
-            for total_cnt, ex in enumerate(json_obj):
-                if cnt >= self._max_instances:
-                    break
-                if len(cache_buffer)>50:
-                    self.cache.write(cache_buffer)
-                    cache_buffer = []
-                if total_cnt in sent_set:
-                    continue
-                else:    
-                    ins = self.create_instance(ex)
-                    cache_buffer.append([total_cnt, ins])
-                if ins is not None:
-                    yield ins
-                    cnt +=1
-        self.cache.write(cache_buffer)
+        if cont_flag:
+            with open(file_path, "r") as data_file:
+                json_obj = json.load(data_file)
+                for total_cnt, ex in enumerate(json_obj):
+                    if cnt >= self._max_instances:
+                        break
+                    if len(cache_buffer)>50:
+                        self.cache.write(cache_buffer)
+                        cache_buffer = []
+                    if total_cnt in sent_set:
+                        continue
+                    else:    
+                        ins = self.create_instance(ex)
+                        cache_buffer.append([total_cnt, ins])
+                    if ins is not None:
+                        yield ins
+                        cnt +=1
+            self.cache.write(cache_buffer)
 
 
     def process_instance(self, instance: Instance, index: int):
