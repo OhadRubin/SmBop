@@ -14,14 +14,14 @@ Author implementation of this [NAACL 2021 paper](https://arxiv.org/abs/2010.1241
     ```
     
 3. Run this command to install NLTK punkt.
-```
-python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')"
-```
+    ```
+    python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')"
+    ```
 
 4. Download the Spider dataset with the following command:
-```
- bash download_spider.sh 
-```
+    ```
+    bash download_spider.sh 
+    ```
 
 ## Training the parser
 Use the following command to train:
