@@ -61,6 +61,7 @@ def main():
                 if i == 0:
                     instance_0 = instance
                 if instance is not None:
+                    predictor._dataset_reader.apply_token_indexers(instance)
                     with torch.cuda.amp.autocast(enabled=True):
                         out = predictor._model.forward_on_instances(
                             [instance, instance_0]
