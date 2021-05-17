@@ -56,6 +56,7 @@ class SmbopSpiderDatasetReader(DatasetReader):
         decoder_timesteps=9,
         limit_instances=-1,
         value_pred=True,
+        use_longdb=True,
     ):
         super().__init__(
             # lazy=lazy,
@@ -70,6 +71,7 @@ class SmbopSpiderDatasetReader(DatasetReader):
         self._decoder_timesteps = decoder_timesteps
         self._max_instances = max_instances
         self.limit_instances = limit_instances
+        self.load_less = limit_instances!=-1
 
         self._utterance_token_indexers = question_token_indexers
 
@@ -90,6 +92,7 @@ class SmbopSpiderDatasetReader(DatasetReader):
             qq_max_dist,
             cc_max_dist,
             tt_max_dist,
+            use_longdb,
         )
         self._create_action_dicts()
         self.replacer = Replacer(tables_file)
@@ -183,6 +186,7 @@ class SmbopSpiderDatasetReader(DatasetReader):
 
         cnt = 0
         cache_buffer = []
+        cont_flag = True
         sent_set = set()
         for total_cnt,ins in self.cache:
             if cnt >= self._max_instances:
@@ -191,25 +195,28 @@ class SmbopSpiderDatasetReader(DatasetReader):
                 yield ins
                 cnt += 1
             sent_set.add(total_cnt)
+            if self.load_less and len(sent_set) > self.limit_instances:
+                cont_flag = False
+                break
 
-        
-        with open(file_path, "r") as data_file:
-            json_obj = json.load(data_file)
-            for total_cnt, ex in enumerate(json_obj):
-                if cnt >= self._max_instances:
-                    break
-                if len(cache_buffer)>50:
-                    self.cache.write(cache_buffer)
-                    cache_buffer = []
-                if total_cnt in sent_set:
-                    continue
-                else:    
-                    ins = self.create_instance(ex)
-                    cache_buffer.append([total_cnt, ins])
-                if ins is not None:
-                    yield ins
-                    cnt +=1
-        self.cache.write(cache_buffer)
+        if cont_flag:
+            with open(file_path, "r") as data_file:
+                json_obj = json.load(data_file)
+                for total_cnt, ex in enumerate(json_obj):
+                    if cnt >= self._max_instances:
+                        break
+                    if len(cache_buffer)>50:
+                        self.cache.write(cache_buffer)
+                        cache_buffer = []
+                    if total_cnt in sent_set:
+                        continue
+                    else:    
+                        ins = self.create_instance(ex)
+                        cache_buffer.append([total_cnt, ins])
+                    if ins is not None:
+                        yield ins
+                        cnt +=1
+            self.cache.write(cache_buffer)
 
 
     def process_instance(self, instance: Instance, index: int):
@@ -418,7 +425,7 @@ class SmbopSpiderDatasetReader(DatasetReader):
         fields["offsets"] = ArrayField(
             np.array(offsets), padding_value=0, dtype=np.int32
         )
-        fields["enc"] = TextField(enc_field_list, self._utterance_token_indexers)
+        fields["enc"] = TextField(enc_field_list)
 
         ins = Instance(fields)
         return ins
@@ -526,6 +533,9 @@ class SmbopSpiderDatasetReader(DatasetReader):
                     span_text = self._tokenizer.tokenizer.decode(utt_idx[i_ : j_ + 1])
                     span_hash_array[i_, j_] = self.hash_text(span_text)
         return span_hash_array
+
+    def apply_token_indexers(self, instance: Instance) -> None:
+        instance.fields["enc"].token_indexers = self._utterance_token_indexers
 
 
 def table_text_encoding(entity_text_list):

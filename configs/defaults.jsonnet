@@ -16,6 +16,7 @@ local misc_params = {
           "cntx_beam":stringToBool("cntx_beam"),
           "disentangle_cntx":stringToBool("disentangle_cntx"),
           "value_pred":stringToBool("value_pred"),
+          "use_longdb":stringToBool("use_longdb"),
           "uniquify":stringToBool("uniquify"),
           "use_bce": stringToBool("use_bce"),
           "tiny_dataset":stringToBool("tiny_dataset"),
@@ -57,11 +58,11 @@ local large_setting = {
   
   pretrained_embedding_dim :: 1024,
   // cache_path ::  if misc_params.value_pred then "cache/exp700" else "cache/exp304_no_values", 
-  cache_path ::  if misc_params.value_pred then "cache/exp1000" else "cache/exp304_no_values", 
+  cache_path ::  if misc_params.value_pred then "cache/exp2001" else "cache/exp304_no_values", 
   
 
 };
-local max_instances = if misc_params.tiny_dataset then 3500 else 1000000;
+local max_instances = if misc_params.tiny_dataset then 500 else 1000000;
 
 
 
@@ -117,6 +118,7 @@ local dataset_reader_name = "smbop";
     "max_instances": max_instances,
     "limit_instances" : setting.limit_instances, 
     "value_pred":misc_params.value_pred,
+    "use_longdb":misc_params.use_longdb,
   },
   "validation_dataset_reader": {
     "type": dataset_reader_name,
@@ -135,6 +137,7 @@ local dataset_reader_name = "smbop";
     "max_instances": max_instances,
     "limit_instances" : setting.limit_instances_val,
     "value_pred":misc_params.value_pred,
+    "use_longdb":misc_params.use_longdb,
   },
   "train_data_path": dataset_path + "train_spider.json",
   "validation_data_path": dataset_path + setting.data_suffix,
@@ -221,8 +224,7 @@ local dataset_reader_name = "smbop";
     "patience": 100,
     "validation_metric":  "+spider",
 
-    
-  
+
   "num_gradient_accumulation_steps" : setting.grad_acum,
   "checkpointer": {"num_serialized_models_to_keep": 1},
     "optimizer": {

@@ -35,11 +35,14 @@ predictor = Predictor.from_path(
 instance_0 = predictor._dataset_reader.text_to_instance(
     utterance="asds", db_id="aircraft"
 )
+predictor._dataset_reader.apply_token_indexers(instance_0)  
 def inference(question,db_id):
   instance = predictor._dataset_reader.text_to_instance(
       utterance=question, db_id=db_id,
   )
+  predictor._dataset_reader.apply_token_indexers(instance)  
   with torch.cuda.amp.autocast(enabled=True):
+        
       out = predictor._model.forward_on_instances(
           [instance, instance_0]
       )

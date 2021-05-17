@@ -14,24 +14,23 @@ Author implementation of this [NAACL 2021 paper](https://arxiv.org/abs/2010.1241
     ```
     
 3. Run this command to install NLTK punkt.
-```
-python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')"
-```
+    ```
+    python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')"
+    ```
 
-4. Download the dataset from the [official Spider dataset website](https://yale-lily.github.io/spider)
+4. Download the Spider dataset with the following command:
+    ```
+    bash download_spider.sh 
+    ```
 
-5. Edit the config files `configs/defaults.jsonnet` to update 
-the location of the dataset:
-```
-local dataset_path = "dataset/";
-```
 ## Training the parser
 Use the following command to train:
 ```
 python exec.py 
 ``` 
 
-First time loading of the dataset might take a while (a few hours) since the model first loads values from tables and calculates similarity features with the relevant question. It will then be cached for subsequent runs.
+First time loading of the dataset might take a while (a few hours) since the model first loads values from tables and calculates similarity features with the relevant question. It will then be cached for subsequent runs. Use the `disable_db_content` argument to reduce the pre-processing time in exchange of not performing IR on some (incredibly large) tables.
+
 
 ## Evaluation
 To create predictions run the following command:
