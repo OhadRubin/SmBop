@@ -20,7 +20,7 @@ Author implementation of this [NAACL 2021 paper](https://arxiv.org/abs/2010.1241
 
 4. Download the Spider dataset with the following command:
     ```
-    bash download_spider.sh 
+    bash scripts/download_spider.sh 
     ```
 
 ## Training the parser
