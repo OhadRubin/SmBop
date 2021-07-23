@@ -129,15 +129,10 @@ def reconstruct_tree(
     return tuple_el
 
 
-def remove_keep(node):
+def remove_keep(node: Node):
+    if node.name == "keep":
+        node = remove_keep(node.children[0])
     node.children = [remove_keep(child) for child in node.children]
-    child_list = []
-    for child in node.children:
-        if child.name == "keep":
-            child_list.append(child.children[0])
-        else:
-            child_list.append(child)
-    node.children = child_list
     return node
 
 
