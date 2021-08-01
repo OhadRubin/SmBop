@@ -315,13 +315,102 @@ class SmbopParser(Model):
             self._rule_tensor_flat = self._rule_tensor_flat.to(device)
             self._rule_tensor = self._rule_tensor.to(device)
             self.flag_move_to_gpu = False
+    """
+    
 
+#enc
+the question concatenated with the schema
+
+#db_id
+the id of the database schema we want to execute the query against
+
+#schema_hash 
+the hash of every schema string (applying dethash to every schema element) 
+
+#schema_types
+the type of every schema element (Value or Table), Value is either a Column or a literal.
+
+#tree_obj
+the AnyTree Node gold tree object after adding the hash attributes.
+
+#gold_sql
+the gold sql string.
+
+#leaf_indices
+makes it easier to pick the gold leaves during the oracle setup.
+
+#entities
+deprecated.
+
+#orig_entities
+used to reconstruct the tree for evaluation (this is added_values concatenated with the schema).
+
+#is_gold_leaf
+a boolean vector to tell if a given leaf is a gold leaf (i.e it corrosponds to a schema_hash that is in hash_gold_levelorder[0]).
+
+#lengths
+the length of the schema and the question, this is used to seperate them. 
+
+#offsets
+an array of size [batch_size, max_entity_token_length, 2] that contains the start and end indices for each schema token (and question, but that is inefficiet)
+example:
+given enc of [how,old,is,flights, flights, . ,start, flights, . ,end]
+the output of batched_span_select given offsets would be:
+[[how,pad,pad]
+[[old,pad,pad]
+..
+[[flights,pad,pad]
+[flights,.,start]
+[flights,.,end]]
+
+#relation
+black box from ratsql
+
+#depth
+used to batch similar depth instances together. (see sorting keys in defaults.jsonnet)
+
+#hash_gold_levelorder
+An array of the gold hashes corrosponding to nodes in the gold tree
+For example:
+And  170816594
+├── keep  -218759080
+│   └── keep  -218759080
+│       └── keep  -218759080
+│           └── Value fictional_universe.type_of_fictional_setting -218759080
+└── Join  -270677574
+    ├── keep  55125446
+    │   └── R  55125446
+    │       └── Value fictional_universe.fictional_setting.setting_type 176689722
+    └── Join  -149501965
+        ├── keep  -94519500
+        │   └── Value fictional_universe.fictional_setting.works_set_here -94519500
+        └── literal  -26546860
+            └── Value the atom cave raiders! 172249327
+[[-218759080  176689722  -94519500  172249327]
+ [-218759080   55125446  -94519500  -26546860]
+ [-218759080   55125446 -149501965         -1]
+ [-218759080 -270677574         -1         -1]
+ [ 170816594         -1         -1         -1]
+ [ 170816594         -1         -1         -1]
+ [ 170816594         -1         -1         -1]
+ [ 170816594         -1         -1         -1]
+ [ 170816594         -1         -1         -1]]
+
+#hash_gold_tree
+root node hash
+
+#span_hash
+We apply dethash to every continuous span within the question, this results in a square matrix of size [batch_size, max_question_length, max_question_length].
+
+#is_gold_span
+a boolean vector to tell if a given span is a gold span (i.e it corrosponds to a span_hash that is in hash_gold_levelorder[0]).
+    """
     def forward(
         self,
         enc,
         db_id,
-        leaf_hash,
-        leaf_types,
+        leaf_hash, #schema_hash
+        leaf_types, #schema_types
         tree_obj=None,
         gold_sql=None,
         leaf_indices=None,
