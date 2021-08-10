@@ -182,8 +182,8 @@ class EncPreproc:
         for db_id, schema in self.schemas.items():
             sqlite_path = Path(self._dataset_path) / db_id / f"{db_id}.sqlite"
             source: sqlite3.Connection
-            with sqlite3.connect(sqlite_path) as source:
-                dest = sqlite3.connect(":memory:")
+            with sqlite3.connect(sqlite_path, check_same_thread=False) as source:
+                dest = sqlite3.connect(":memory:", check_same_thread=False)
                 dest.row_factory = sqlite3.Row
                 source.backup(dest)
             schema.connection = dest
